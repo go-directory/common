@@ -370,6 +370,8 @@ func toInt(x any) (v int, ok bool) {
 		v = int(tv)
 		ok = true
 	default:
+		// for custom user-defined types based on
+		// select built-in integer types.
 		const maxU = ^uint(0)
 		const minU = 0
 		const maxI = int(maxU >> 1)
