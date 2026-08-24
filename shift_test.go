@@ -5,23 +5,23 @@ import (
 	"testing"
 )
 
-var testMap map[int]Kind
+var testMap map[int]BitValueKind
 
-func ExampleNew() {
-	bits := New(Uint16)
+func ExampleNewBitValue() {
+	bits := NewBitValue(Uint16)
 	fmt.Printf("%T size %d, max %d", bits, bits.Size(), bits.Max())
 	// Output: common.BitValue size 16, max 65535
 }
 
 func ExampleBitValue_Shift() {
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	bits.Shift(2, 4, 32)
 	fmt.Printf("Value: %d", bits.Int())
 	// Output: Value: 38
 }
 
 func ExampleBitValue_Unshift() {
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	bits.Shift(2, 4, 32)
 	bits.Unshift(32)
 	fmt.Printf("Value: %d", bits.Int())
@@ -35,25 +35,25 @@ func ExampleBitValue_Min() {
 }
 
 func ExampleBitValue_Max_for8Bit() {
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	fmt.Printf("%d", bits.Max())
 	// Output: 255
 }
 
 func ExampleBitValue_Max_for16Bit() {
-	bits := New(Uint16)
+	bits := NewBitValue(Uint16)
 	fmt.Printf("%d", bits.Max())
 	// Output: 65535
 }
 
 func ExampleBitValue_Max_for32bit() {
-	bits := New(Uint32)
+	bits := NewBitValue(Uint32)
 	fmt.Printf("%d", bits.Max())
 	// Output: 4294967295
 }
 
 func ExampleBitValue_Int() {
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	bits.Shift(2, 4, 32)
 	fmt.Printf("%d", bits.Int())
 	// Output: 38
@@ -62,7 +62,7 @@ func ExampleBitValue_Int() {
 func ExampleBitValue_Int_mixed() {
 	var ints []int
 	for i := 0; i < 3; i++ {
-		bits := New(Kind(i + 1))
+		bits := NewBitValue(BitValueKind(i + 1))
 		bits.Shift(bits.Size() << i)
 		ints = append(ints, bits.Int())
 	}
@@ -71,31 +71,31 @@ func ExampleBitValue_Int_mixed() {
 }
 
 func ExampleBitValue_Value() {
-	bits := New(Uint32)
+	bits := NewBitValue(Uint32)
 	bits.Shift(bits.Max())
 	fmt.Printf("%T", bits.Value())
 	// Output: *uint32
 }
 
 func ExampleBitValue_Kind() {
-	bits := New(Uint32)
+	bits := NewBitValue(Uint32)
 	fmt.Printf("%s", bits.Kind())
 	// Output: uint32
 }
 
 func ExampleBitValue_Size() {
-	bits := New(Uint32)
+	bits := NewBitValue(Uint32)
 	fmt.Printf("%d", bits.Size())
 	// Output: 32
 }
 
-func ExampleKind_Size() {
+func ExampleBitValueKind_Size() {
 	k := Uint32
 	fmt.Printf("%d", k.Size())
 	// Output: 32
 }
 
-func ExampleKind_String() {
+func ExampleBitValueKind_String() {
 	fmt.Printf("%s", Uint32)
 	// Output: uint32
 }
@@ -114,7 +114,7 @@ func ExampleBitValue_Positive_uint8() {
 		Bopt8               // 128	// go no higher (else, overflow uint8)
 	)
 
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	bits.Shift(Bopt1, Bopt3, Bopt6)
 	fmt.Printf("Value contains B-options #6 (32): %t", bits.Positive(Bopt6))
 	// Output: Value contains B-options #6 (32): true
@@ -157,7 +157,7 @@ func ExampleBitValue_Positive_int32() {
 		Bopt31               // 1073741824 // go no higher (else, overflow int32)
 	)
 
-	bits := New(Uint32)
+	bits := NewBitValue(Uint32)
 	bits.Shift(Bopt1, Bopt31, Bopt6)
 	fmt.Printf("Value contains B-options #31 (1073741824): %t", bits.Positive(Bopt31))
 	// Output: Value contains B-options #31 (1073741824): true
@@ -165,7 +165,7 @@ func ExampleBitValue_Positive_int32() {
 
 func ExampleBitValue_SetNamesMap() {
 	// user-defined shift values
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 
 	type B uint8
 	const (
@@ -206,7 +206,7 @@ func ExampleBitValue_SetNamesMap() {
 }
 
 func ExampleBitValue_None() {
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	bits.Shift(8 << 1)
 	bits.None() // annihilate any value
 
@@ -215,7 +215,7 @@ func ExampleBitValue_None() {
 }
 
 func ExampleBitValue_All() {
-	bits := New(Uint16)
+	bits := NewBitValue(Uint16)
 	bits.All() // shift EVERYTHING
 
 	fmt.Printf("%d", bits.Int())
@@ -223,7 +223,7 @@ func ExampleBitValue_All() {
 }
 
 func ExampleBitValue_NamesMap() {
-	bits := New(Uint8)
+	bits := NewBitValue(Uint8)
 	fmt.Printf("%T", bits.NamesMap()) // note this is a nil map
 	// Output: map[int]string
 }
@@ -243,7 +243,7 @@ func TestBitValue_codecov(t *testing.T) {
 			t.Name(), i)
 	}
 
-	bits = New(Uint8)
+	bits = NewBitValue(Uint8)
 	bits.Shift(bits.Max())
 	bits.Shift(8 << 8)
 	bits.Shift(8 << 1)
@@ -254,7 +254,7 @@ func TestBitValue_codecov(t *testing.T) {
 	bits.Value()
 
 	for _, kind := range testMap {
-		instance := New(kind)
+		instance := NewBitValue(kind)
 		size := instance.Size()
 		_ = kind.String()
 		_ = bits.Int()
@@ -277,7 +277,7 @@ func TestBitValue_codecov(t *testing.T) {
 }
 
 func init() {
-	testMap = map[int]Kind{
+	testMap = map[int]BitValueKind{
 		8:  Uint8,
 		16: Uint16,
 		32: Uint32,

@@ -8,17 +8,17 @@ import (
 )
 
 /*
-Kind represents the specific unsigned integer type
-selected for use within instances of BitValue.
+BitValueKind represents the specific unsigned integer type
+selected for use within instances of [BitValue].
 */
-type Kind uint8
+type BitValueKind uint8
 
 /*
-Kind constants define the desired bit allocation
+BitValueKind constants define the desired bit allocation
 size for an instance of BitValue.
 */
 const (
-	_      Kind = iota // 0x0
+	_      BitValueKind = iota // 0x0
 	Uint8              // 0x1; allows eight (8) bits, max val: 255
 	Uint16             // 0x2; allows sixteen (16) bits, max val: 65535
 	Uint32             // 0x3; allows thirty two (32) bits, max val: 4294967295
@@ -33,7 +33,7 @@ was selected during initialization:
   - uint16
   - uint32
 */
-func (r Kind) String() (k string) {
+func (r BitValueKind) String() (k string) {
 	k = `unknown`
 
 	switch r {
@@ -55,7 +55,7 @@ values are eight (8), sixteen (16) or thirty-two (32).
 A value of zero (0) indicates the instance has not yet been
 initialized (hint: see the New function).
 */
-func (r Kind) Size() (size int) {
+func (r BitValueKind) Size() (size int) {
 	size = 0
 
 	switch r {
@@ -71,7 +71,7 @@ func (r Kind) Size() (size int) {
 }
 
 /*
-BitValue contains the allocated value type, a Kind and a bit size reflecting the
+BitValue contains the allocated value type, a BitValueKind and a bit size reflecting the
 allocated instance magnitude.
 
 Shift, Unshift and Positive operations may be conducted against instances of this
@@ -80,9 +80,9 @@ type.
 New instances of this type are created using the New package-level function.
 */
 type BitValue struct {
-	k Kind           // user-selected Kind
+	k BitValueKind           // user-selected BitValueKind
 	s uint8          // size (in bits: 8, 16 or 32)
-	v any            // allocated instance (as a ptr), per Kind
+	v any            // allocated instance (as a ptr), per BitValueKind
 	m map[int]string // string names for values, optional
 }
 
@@ -138,12 +138,12 @@ func (r BitValue) Int() (i int) {
 }
 
 /*
-Kind returns the instance of Kind assigned to the receiver
+Kind returns the instance of [BitValueKind] assigned to the receiver
 instance, which can be one (1) of three (3) possible values.
 
-See the Kind constants for the complete list.
+See the [BitValueKind] constants for the complete list.
 */
-func (r BitValue) Kind() Kind {
+func (r BitValue) Kind() BitValueKind {
 	return r.k
 }
 
@@ -473,11 +473,11 @@ func (r BitValue) strIndex(x string) (idx int) {
 }
 
 /*
-New initializes a new instance of [BitValue], using [Kind] k as
-the indicator for the desired bit allocation size. See the [Kind]
+NewBitValue initializes a new instance of [BitValue], using [BitValueKind] k as
+the indicator for the desired bit allocation size. See the [BitValueKind]
 constants for available values.
 */
-func New(k Kind) (bv BitValue) {
+func NewBitValue(k BitValueKind) (bv BitValue) {
 	bv.k = k
 
 	switch k {
