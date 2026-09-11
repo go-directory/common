@@ -16,12 +16,30 @@ A zero instance of this type equates to LDAP result code 0
 type Error struct {
 	Code uint16
 	Text string
+	Diag string
 }
 
 /*
 Error returns the string error message.
 */
 func (r Error) Error() string { return r.Text }
+
+/*
+SetDiag assigns the input text sequence as a diagnostic
+message.
+
+A diagnostic message does not necessarily indicate an
+error has occurred.
+*/
+func (r *Error) SetDiag(diag ...string) {
+	if len(diag) > 0 {
+		res := &strings.Builder{}
+		for i := 0; i < len(diag); i++ {
+			res.WriteString(diag[i])
+		}
+		r.Diag = res.String()
+	}
+}
 
 /*
 NewError returns an instance of error circumscribing
@@ -55,6 +73,8 @@ following conditions evaluating as true:
 If the assertion value rc is zero (0) and err is nil, a
 result of true is returned, regardless of the underlying
 concrete type.
+
+Any diagnostic message present in the error is not evaluated.
 */
 func ErrorIs(err error, rc uint16) (is bool) {
 	empty := err == nil
