@@ -108,3 +108,7 @@ const (
 	ErrorFilterDecompile                         // 202
 	ErrorDebugging                               // 203
 )
+
+const (
+	ErrorASN1 ResultCode = iota + 300
+)
