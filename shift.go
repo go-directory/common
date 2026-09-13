@@ -19,9 +19,9 @@ size for an instance of BitValue.
 */
 const (
 	_      BitValueKind = iota // 0x0
-	Uint8              // 0x1; allows eight (8) bits, max val: 255
-	Uint16             // 0x2; allows sixteen (16) bits, max val: 65535
-	Uint32             // 0x3; allows thirty two (32) bits, max val: 4294967295
+	Uint8                      // 0x1; allows eight (8) bits, max val: 255
+	Uint16                     // 0x2; allows sixteen (16) bits, max val: 65535
+	Uint32                     // 0x3; allows thirty two (32) bits, max val: 4294967295
 )
 
 /*
@@ -80,7 +80,7 @@ type.
 New instances of this type are created using the New package-level function.
 */
 type BitValue struct {
-	k BitValueKind           // user-selected BitValueKind
+	k BitValueKind   // user-selected BitValueKind
 	s uint8          // size (in bits: 8, 16 or 32)
 	v any            // allocated instance (as a ptr), per BitValueKind
 	m map[int]string // string names for values, optional
