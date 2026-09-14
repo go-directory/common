@@ -5,6 +5,25 @@ import (
 	"testing"
 )
 
+func ExampleZeroError() {
+	realErr := ZeroError(exampleError)
+	noErr := ZeroError(exampleNoError)
+	goErr := ZeroError(exampleGoError)
+	diag := ZeroError(exampleDiag)
+
+	fmt.Printf("Real error: %t\n", realErr) 	   // Result: 66 (not allowed on non-leaf)
+	fmt.Printf("Go error:   %t\n", goErr)   	   // any non-nil standard Go error
+	fmt.Printf("No error:   %t\n", noErr)   	   // Result: 0 (success)
+	fmt.Printf("Diag only:  %t\n", diag)    	   // Result: 0 (success, but only contains a diagnostic message)
+	fmt.Printf("Idiomatic:  %t\n", exampleDiag == nil) // inappropriate idiomatic eval.
+	// Output:
+	// Real error: false
+	// Go error:   false
+	// No error:   true
+	// Diag only:  true
+	// Idiomatic:  false
+}
+
 func ExampleError_idiomatic() {
 	// pretend exampleError was just handed to you
 	// after attempting to delete a subtree without
@@ -45,4 +64,16 @@ func TestErrorIs_codecov(t *testing.T) {
 	newRes(0)
 }
 
-var exampleError error = newRes(66, "Operation not allowed on non-leaf")
+var (
+	exampleError error = LDAPResultNotAllowedOnNonLeaf.New( "Operation not allowed on non-leaf")
+	exampleNoError error = LDAPResultSuccess.New()
+	exampleGoError error = fmt.Errorf("A standard Go error")
+	exampleDiag error
+)
+
+
+func init() {
+	diag := LDAPResultSuccess.New().(Error)
+	diag.SetDiag("Diagnostic message")
+	exampleDiag = diag
+}
