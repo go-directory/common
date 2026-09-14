@@ -47,6 +47,7 @@ the concrete [Error] type.
 */
 func newRes(rc uint16, msg ...string) (err error) {
 	if rc == 0 {
+		err = Error{}
 		return
 	}
 
@@ -87,6 +88,28 @@ func ErrorIs(err error, rc uint16) (is bool) {
 			is = tv.Code == rc
 		default:
 		}
+	}
+
+	return
+}
+
+/*
+ZeroError returns a Boolean value indicative of the receiver
+being zero, or nil depending on the underlying error type.
+
+If err is an instance of [Error], the Diag struct field is NOT
+evaluated. The Code struct field must be 0 and the Text struct
+field must be "" to guarantee a return value of true.
+
+If the err is NOT an instance of [Error] (meaning it is just a
+"regular Go error"), it is evaluated using the standard idiomatic
+expression "err == nil".
+*/
+func ZeroError(err error) (is bool) {
+	if E, ok := err.(Error); ok && err != nil {
+		is = len(E.Text) == 0 && E.Code == 0
+	} else {
+		is = err == nil
 	}
 
 	return
