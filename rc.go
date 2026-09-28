@@ -107,6 +107,7 @@ const (
 	ErrorFilterCompile                           // 201
 	ErrorFilterDecompile                         // 202
 	ErrorDebugging                               // 203
+	ErrorClient				     // 204 ; general client error
 )
 
 const (
