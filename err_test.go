@@ -11,10 +11,10 @@ func ExampleZeroError() {
 	goErr := ZeroError(exampleGoError)
 	diag := ZeroError(exampleDiag)
 
-	fmt.Printf("Real error: %t\n", realErr) 	   // Result: 66 (not allowed on non-leaf)
-	fmt.Printf("Go error:   %t\n", goErr)   	   // any non-nil standard Go error
-	fmt.Printf("No error:   %t\n", noErr)   	   // Result: 0 (success)
-	fmt.Printf("Diag only:  %t\n", diag)    	   // Result: 0 (success, but only contains a diagnostic message)
+	fmt.Printf("Real error: %t\n", realErr)            // Result: 66 (not allowed on non-leaf)
+	fmt.Printf("Go error:   %t\n", goErr)              // any non-nil standard Go error
+	fmt.Printf("No error:   %t\n", noErr)              // Result: 0 (success)
+	fmt.Printf("Diag only:  %t\n", diag)               // Result: 0 (success, but only contains a diagnostic message)
 	fmt.Printf("Idiomatic:  %t\n", exampleDiag == nil) // inappropriate idiomatic eval.
 	// Output:
 	// Real error: false
@@ -65,12 +65,11 @@ func TestErrorIs_codecov(t *testing.T) {
 }
 
 var (
-	exampleError error = LDAPResultNotAllowedOnNonLeaf.New( "Operation not allowed on non-leaf")
+	exampleError   error = LDAPResultNotAllowedOnNonLeaf.New("Operation not allowed on non-leaf")
 	exampleNoError error = LDAPResultSuccess.New()
 	exampleGoError error = fmt.Errorf("A standard Go error")
-	exampleDiag error
+	exampleDiag    error
 )
-
 
 func init() {
 	diag := LDAPResultSuccess.New().(Error)
