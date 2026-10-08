@@ -107,10 +107,10 @@ const (
 	ErrorFilterCompile                           // 201
 	ErrorFilterDecompile                         // 202
 	ErrorDebugging                               // 203
-	ErrorClient				     // 204 ; general client error
+	ErrorClient                                  // 204 ; general client error
 )
 
 const (
-	ErrorASN1 ResultCode = iota + 300 // 300
-	ErrorParse			  // 301 ; general parsing error
+	ErrorASN1  ResultCode = iota + 300 // 300
+	ErrorParse                         // 301 ; general parsing error
 )
