@@ -111,6 +111,7 @@ const (
 )
 
 const (
-	ErrorASN1  ResultCode = iota + 300 // 300
-	ErrorParse                         // 301 ; general parsing error
+	ErrorASN1    ResultCode = iota + 300 // 300
+	ErrorGeneral                         // 301 ; general error
+	ErrorParse                           // 302 ; general parsing error
 )
