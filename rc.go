@@ -116,7 +116,8 @@ const (
 	ErrorSyntax                          // 204 ; general syntax error
 	ErrorServer                          // 205 ; general dSA (server) error
 	ErrorParse                           // 206 ; general parsing error
-	ErrorGeneral                         // 207 ; general error
+	ErrorConfig                          // 207 ; general configuration error
+	ErrorGeneral                         // 208 ; general unclassified error
 )
 
 /*
