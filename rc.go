@@ -99,7 +99,7 @@ func (r ResultCode) New(msg ...string) error {
 LDAP-adjacent errors.
 */
 const (
-	LDAPResultCanceled        ResultCode = iota + 118 // 118 
+	LDAPResultCanceled        ResultCode = iota + 118 // 118
 	LDAPResultNoSuchOperation                         // 119
 	LDAPResultTooLate                                 // 120
 	LDAPResultCannotCancel                            // 121
@@ -109,21 +109,21 @@ const (
 Topical errors.
 */
 const (
-	ErrorNetwork         ResultCode = iota + 200 // 200 ; general network error
-	ErrorClient                                  // 201 ; general dUA (client) error
-	ErrorSchema                                  // 202 ; general schema error
-	ErrorBackend				     // 203 ; general backend (dib) error
-	ErrorSyntax				     // 204 ; general syntax error
-	ErrorServer                                  // 205 ; general dSA (server) error
-	ErrorParse                                   // 206 ; general parsing error
-	ErrorGeneral                                 // 207 ; general error
+	ErrorNetwork ResultCode = iota + 200 // 200 ; general network error
+	ErrorClient                          // 201 ; general dUA (client) error
+	ErrorSchema                          // 202 ; general schema error
+	ErrorBackend                         // 203 ; general backend (dib) error
+	ErrorSyntax                          // 204 ; general syntax error
+	ErrorServer                          // 205 ; general dSA (server) error
+	ErrorParse                           // 206 ; general parsing error
+	ErrorGeneral                         // 207 ; general error
 )
 
 /*
 Codec errors.
 */
 const (
-	ErrorASN1             ResultCode = iota + 300 // 300 ; general ASN.1 codec error
-	ErrorFilterCompile                            // 301 ; filter compilation (encoding) error
-	ErrorFilterDecompile                          // 302 ; filter decompilation (decoding) error
+	ErrorASN1            ResultCode = iota + 300 // 300 ; general ASN.1 codec error
+	ErrorFilterCompile                           // 301 ; filter compilation (encoding) error
+	ErrorFilterDecompile                         // 302 ; filter decompilation (decoding) error
 )
