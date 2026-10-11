@@ -108,6 +108,7 @@ const (
 	ErrorFilterDecompile                         // 202
 	ErrorDebugging                               // 203
 	ErrorClient                                  // 204 ; general client error
+	ErrorSchema                                  // 205 ; general schema error
 )
 
 const (
