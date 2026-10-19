@@ -1,67 +1,329 @@
 package common
 
 import (
+	"errors"
 	"strings"
 )
 
 /*
-Error implements the Go error interface type, and contains
-an LDAP result code and (usually) a text message.
+Error implements the combination of the standard Go error
+with a so-called "LDAPResult Precursor".
 
 Instances of this type are created using [NewError].
+
+Instances of this type implement the Go error interface like
+any other error. However the following RFC4511 components are
+accessible for getting and setting:
+
+  - Result code (uint16)
+  - Matched DN (string)
+  - Diagnostic Message (string)
+  - Referral ([]string)
+
+Additionally, other helpful components (not standards-derived)
+are available:
+
+  - Error "header" (classification label)
+  - Error slices (for when multiple errors may be accumulated for a single "event")
 
 A zero instance of this type equates to LDAP result code 0
 (success).
 */
 type Error struct {
-	Code uint16
-	Text string
-	Diag string
+	*ldapResult
+}
+
+type ldapResult struct {
+	ResultCode        uint16
+	Header            string
+	Text              string
+	DiagnosticMessage string
+	MatchedDN         string
+	Referral          []string
+	Errors            []error
 }
 
 /*
-Error returns the string error message.
+Error returns the string error message specified as
+the "Text" component.
+
+See also the [Error.Text] and [Error.SetText] methods.
 */
-func (r Error) Error() string { return r.Text }
+func (r Error) Error() string {
+	var e string
+
+	if !r.IsNil() && r.ldapResult.Text != "" {
+		if r.ldapResult.Header != "" {
+			e = r.ldapResult.Header + ` `
+		}
+		e += r.ldapResult.Text
+	}
+
+	return e
+}
 
 /*
-SetDiag assigns the input text sequence as a diagnostic
-message.
+AppendError appends slices of error instances to the
+receiver instance. Slices are evaluated by way of the
+[ZeroError] function.
+*/
+func (r Error) AppendError(err ...error) {
+	if r.IsNil() {
+		r.ldapResult = &ldapResult{}
+	}
+
+	for i := 0; i < len(err); i++ {
+		if !ZeroError(err[i]) {
+			r.ldapResult.Errors =
+				append(r.ldapResult.Errors, err[i])
+		}
+	}
+}
+
+/*
+Errors returns slices of errors.
+*/
+func (r Error) Errors() []error {
+	var errs []error
+	if !r.IsNil() {
+		errs = r.ldapResult.Errors
+	}
+
+	return errs
+}
+
+/*
+GoError returns the receiver instance as a standard
+Go error (using [errors.New]).
+
+Note that this is a "lossy" method, in that only the
+"Text" component of [Error] is incorporated into the
+return instance. All other components -- such as the
+"ResultCode" or "DiagnosticMessage" components -- are
+not transferred.
+
+If no "Text" value was set within the receiver instance,
+the return value is guaranteed to be nil.
+*/
+func (r Error) GoError() error {
+	var err error
+	if !r.IsNil() && len(r.ldapResult.Text) > 0 {
+		err = errors.New(r.ldapResult.Text)
+	}
+
+	return err
+}
+
+/*
+IsNil returns a Boolean value indicative of the embedded
+receiver instance value is nil.
+*/
+func (r Error) IsNil() bool { return r.ldapResult == nil }
+
+/*
+SetResultCode assigns the input uint16 value to the receiver
+instance as the "ResultCode" component.
+*/
+func (r Error) SetResultCode(rc uint16) {
+	if r.IsNil() {
+		r.ldapResult = &ldapResult{}
+	}
+	r.ldapResult.ResultCode = rc
+}
+
+/*
+ResultCode returns the underlying "ResultCode" uint16
+component value.
+*/
+func (r Error) ResultCode() uint16 {
+	var rc uint16
+	if !r.IsNil() {
+		rc = r.ldapResult.ResultCode
+	}
+
+	return rc
+}
+
+/*
+SetText assigns the input string message slices to the
+receiver instance as the "Text" component. It is this
+value that will appear in error text when raised.
+
+See the [Error.Error] method for a means of retrieving
+the underlying "Text" component value.
+
+Note that this method clobbers any existing text value
+present. See also the [Error.AppendText] method for a
+means of "building" a single error message gradually.
+*/
+func (r Error) SetText(msg ...string) {
+	if len(msg) > 0 {
+		if r.IsNil() {
+			r.ldapResult = &ldapResult{}
+		}
+		r.ldapResult.Text = makeErrorText(msg...)
+	}
+}
+
+/*
+AppendText appends the input text slices to the underlying
+"Text" component. This method is useful when a single error
+message is being built gradually.
+
+See also the [Error.SetText] method for a means of overwriting
+("clobbering") any preexisting "Text" component value in one
+shot.
+*/
+func (r Error) AppendText(msg ...string) {
+	if len(msg) > 0 {
+		if r.IsNil() {
+			r.ldapResult = &ldapResult{}
+		}
+		r.ldapResult.Text += makeErrorText(msg...)
+	}
+}
+
+/*
+SetDiagnosticMessage assigns the input text sequence as an
+LDAPResult "diagnostic message".
 
 A diagnostic message does not necessarily indicate an
 error has occurred.
 */
-func (r *Error) SetDiag(diag ...string) {
+func (r Error) SetDiagnosticMessage(diag ...string) {
 	if len(diag) > 0 {
-		res := &strings.Builder{}
-		for i := 0; i < len(diag); i++ {
-			res.WriteString(diag[i])
+		if r.IsNil() {
+			r.ldapResult = &ldapResult{}
 		}
-		r.Diag = res.String()
+		r.ldapResult.DiagnosticMessage = makeErrorText(diag...)
 	}
 }
 
 /*
-NewError returns an instance of error circumscribing
-the concrete [Error] type.
+SetHeader assigns the input head slices to the receiver
+instance as the leading "Header" component value.
+
+A header will be visible when the receiver instance is
+represented as a standard error or when the [Error.Error]
+method is called. The header is "prepended" to the text.
 */
-func newRes(rc uint16, msg ...string) (err error) {
-	var E Error
-	if rc == 0 {
-		return E
+func (r Error) SetHeader(head ...string) {
+	if len(head) > 0 {
+		if r.IsNil() {
+			r.ldapResult = &ldapResult{}
+		}
+		r.ldapResult.Header = makeErrorText(head...)
 	}
+}
 
-	E.Code = rc
-
+func makeErrorText(msg ...string) (s string) {
 	if len(msg) > 0 {
 		res := &strings.Builder{}
 		for i := 0; i < len(msg); i++ {
 			res.WriteString(msg[i])
 		}
-		E.Text = res.String()
+
+		s = res.String()
 	}
 
-	return E
+	return s
+}
+
+/*
+DiagnosticMessage returns the underlying "DiagnosticMessage"
+component value, if set.
+*/
+func (r Error) DiagnosticMessage() string {
+	var dm string
+	if !r.IsNil() {
+		dm = r.ldapResult.DiagnosticMessage
+	}
+
+	return dm
+}
+
+/*
+Header returns the underlying "Header" component value, if
+set.
+*/
+func (r Error) Header() string {
+	var head string
+	if !r.IsNil() {
+		head = r.ldapResult.Header
+	}
+
+	return head
+}
+
+/*
+SetMatchedDN assigns the input string distinguished name to
+the receiver instance as the "MatchedDN" component.
+*/
+func (r Error) SetMatchedDN(matchedDN string) {
+	if len(matchedDN) > 0 {
+		if r.IsNil() {
+			r.ldapResult = &ldapResult{}
+		}
+		r.ldapResult.MatchedDN = matchedDN
+	}
+}
+
+/*
+MatchedDN returns the underlying "MatchedDN" component value,
+if set.
+*/
+func (r Error) MatchedDN() string {
+	var dn string
+	if !r.IsNil() {
+		dn = r.ldapResult.MatchedDN
+	}
+
+	return dn
+}
+
+/*
+SetReferral appends the input referral string slices to
+the receiver instance as the "Referral" component set.
+*/
+func (r Error) SetReferral(referral ...string) {
+	if len(referral) > 0 {
+		if r.IsNil() {
+			r.ldapResult = &ldapResult{}
+		}
+		r.ldapResult.Referral =
+			append(r.ldapResult.Referral,
+				referral...)
+	}
+}
+
+/*
+Referral returns the underlying "Referral" slice component
+value, if set.
+*/
+func (r Error) Referral() []string {
+	var ref []string
+	if !r.IsNil() {
+		ref = r.ldapResult.Referral
+	}
+
+	return ref
+}
+
+/*
+NewError returns a concrete instance of [Error] (not error).
+
+This function is used for managing an [Error] instance's
+contents prior to return as a standard Go error.
+*/
+func NewError(rc uint16, msg ...string) Error {
+	return newRes(rc, msg...)
+}
+
+func newRes(rc uint16, msg ...string) Error {
+	return Error{&ldapResult{
+		ResultCode: rc,
+		Text:       makeErrorText(msg...),
+	}}
 }
 
 /*
@@ -85,7 +347,7 @@ func ErrorIs(err error, rc uint16) (is bool) {
 	if !empty {
 		switch tv := err.(type) {
 		case Error:
-			is = tv.Code == rc
+			is = tv.ldapResult != nil && tv.ldapResult.ResultCode == rc
 		default:
 		}
 	}
@@ -110,8 +372,11 @@ any standard Go error -- it is evaluated using the standard
 idiomatic expression "err == nil".
 */
 func ZeroError(err error) (is bool) {
+	z := uint16(0)
 	if E, ok := err.(Error); ok && err != nil {
-		is = len(E.Text) == 0 && E.Code == 0
+		is = len(E.Text) == 0 && E.ResultCode() == z
+	} else if E2, ok := err.(Error); ok && err != nil {
+		is = len(E2.Text) == 0 && E2.ResultCode() == z
 	} else {
 		is = err == nil
 	}

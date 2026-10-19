@@ -91,7 +91,7 @@ New returns an instance of error circumscribing a concrete
 [Error] instance bearing the result code in the receiver
 alongside an optional text message.
 */
-func (r ResultCode) New(msg ...string) error {
+func (r ResultCode) New(msg ...string) Error {
 	return newRes(uint16(r), msg...)
 }
 
