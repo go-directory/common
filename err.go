@@ -2,7 +2,6 @@ package common
 
 import (
 	"errors"
-	"strings"
 )
 
 var mkerr = errors.New
@@ -220,7 +219,7 @@ func (r Error) SetHeader(head ...string) {
 
 func makeErrorText(msg ...string) (s string) {
 	if len(msg) > 0 {
-		res := &strings.Builder{}
+		res := &strBuilder{}
 		for i := 0; i < len(msg); i++ {
 			res.WriteString(msg[i])
 		}
