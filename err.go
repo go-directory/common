@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var mkerr = errors.New
+
 /*
 Error implements the combination of the standard Go error
 with a so-called "LDAPResult Precursor".
@@ -108,7 +110,7 @@ the return value is guaranteed to be nil.
 func (r Error) GoError() error {
 	var err error
 	if !r.IsNil() && len(r.ldapResult.Text) > 0 {
-		err = errors.New(r.ldapResult.Text)
+		err = mkerr(r.ldapResult.Text)
 	}
 
 	return err
@@ -373,9 +375,9 @@ idiomatic expression "err == nil".
 */
 func ZeroError(err error) (is bool) {
 	z := uint16(0)
-	if E, ok := err.(Error); ok && err != nil {
+	if E, ok := err.(Error); ok && E.ldapResult != nil {
 		is = len(E.Text) == 0 && E.ResultCode() == z
-	} else if E2, ok := err.(Error); ok && err != nil {
+	} else if E2, ok := err.(Error); ok && E2.ldapResult != nil {
 		is = len(E2.Text) == 0 && E2.ResultCode() == z
 	} else {
 		is = err == nil
