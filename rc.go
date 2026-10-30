@@ -99,17 +99,17 @@ const (
 Extended LDAP result codes.
 */
 const (
-	LDAPResultLCUPResOut ResultCode = iota +113       // 113 -- RFC 3928
-	LDAPResultLCUPSecViolation			  // 114 -- RFC 3928
-	LDAPResultLCUPInvalidData			  // 115 -- RFC 3928
-	LDAPResultLCUPUnsupportedSchema			  // 116 -- RFC 3928
-	LDAPResultLCUPReloadRequired			  // 117 -- RFC 3928
-        LDAPResultCanceled                                // 118 -- RFC 3909
-        LDAPResultNoSuchOperation                         // 119 -- RFC 3909
-        LDAPResultTooLate                                 // 120 -- RFC 3909
-        LDAPResultCannotCancel                            // 121 -- RFC 3909
-        LDAPResultAssertionFailed                         // 122 -- RFC 4528
-        LDAPAuthorizationDenied                           // 123 -- RFC 4370
+	LDAPResultLCUPResOut            ResultCode = iota + 113 // 113 -- RFC 3928
+	LDAPResultLCUPSecViolation                              // 114 -- RFC 3928
+	LDAPResultLCUPInvalidData                               // 115 -- RFC 3928
+	LDAPResultLCUPUnsupportedSchema                         // 116 -- RFC 3928
+	LDAPResultLCUPReloadRequired                            // 117 -- RFC 3928
+	LDAPResultCanceled                                      // 118 -- RFC 3909
+	LDAPResultNoSuchOperation                               // 119 -- RFC 3909
+	LDAPResultTooLate                                       // 120 -- RFC 3909
+	LDAPResultCannotCancel                                  // 121 -- RFC 3909
+	LDAPResultAssertionFailed                               // 122 -- RFC 4528
+	LDAPAuthorizationDenied                                 // 123 -- RFC 4370
 )
 
 /*
