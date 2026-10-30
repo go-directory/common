@@ -375,10 +375,10 @@ idiomatic expression "err == nil".
 func ZeroError(err error) (is bool) {
 	z := uint16(0)
 	if E, ok := err.(Error); ok && E.ldapResult != nil {
+		// is GoDirectory error
 		is = len(E.Text) == 0 && E.ResultCode() == z
-	} else if E2, ok := err.(Error); ok && E2.ldapResult != nil {
-		is = len(E2.Text) == 0 && E2.ResultCode() == z
 	} else {
+		// is standard Go error
 		is = err == nil
 	}
 

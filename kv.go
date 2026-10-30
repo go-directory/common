@@ -84,12 +84,15 @@ type KVStore struct {
 /*
 NewKVStore initializes and returns a new instance of *[KVStore]. Use of
 this constructor is always required.
+
+By default, the return instance has thread-safety disabled, and matching
+requests will ignore case-folding of map indices.
 */
 func NewKVStore() *KVStore {
 	return &KVStore{
-		fold:     sLC,
 		doLock:   func() {},
 		doUnlock: func() {},
+		fold:     sLC,
 		store:    make(map[string]any),
 	}
 }
@@ -162,12 +165,13 @@ func (r *KVStore) IsThreadSafe() bool {
 
 /*
 SetCaseExact enables or disables the behavior towards case-normalization
-with respect to index matching.
+with respect to map index matching.
 
-A value of false, the default, folds all indices to lower-case whenever
+A value of false, the default, folds all map indices to lower-case whenever
 they are evaluated.
 
-A value of true matches indices as-is, meaning no case-folding takes place.
+A value of true matches map indices as-is, meaning no case-folding takes
+place.
 */
 func (r *KVStore) SetCaseExact(enable bool) {
 	r.doLock()

@@ -2,6 +2,15 @@ package common
 
 type ResultCode uint16
 
+/*
+New returns an instance of error circumscribing a concrete
+[Error] instance bearing the result code in the receiver
+alongside an optional text message.
+*/
+func (r ResultCode) New(msg ...string) Error {
+	return newRes(uint16(r), msg...)
+}
+
 const (
 	LDAPResultSuccess                      ResultCode = iota // 0
 	LDAPResultOperationsError                                // 1
@@ -87,22 +96,20 @@ const (
 )
 
 /*
-New returns an instance of error circumscribing a concrete
-[Error] instance bearing the result code in the receiver
-alongside an optional text message.
-*/
-func (r ResultCode) New(msg ...string) Error {
-	return newRes(uint16(r), msg...)
-}
-
-/*
-LDAP-adjacent errors.
+Extended LDAP result codes.
 */
 const (
-	LDAPResultCanceled        ResultCode = iota + 118 // 118
-	LDAPResultNoSuchOperation                         // 119
-	LDAPResultTooLate                                 // 120
-	LDAPResultCannotCancel                            // 121
+	LDAPResultLCUPResOut ResultCode = iota +113       // 113 -- RFC 3928
+	LDAPResultLCUPSecViolation			  // 114 -- RFC 3928
+	LDAPResultLCUPInvalidData			  // 115 -- RFC 3928
+	LDAPResultLCUPUnsupportedSchema			  // 116 -- RFC 3928
+	LDAPResultLCUPReloadRequired			  // 117 -- RFC 3928
+        LDAPResultCanceled                                // 118 -- RFC 3909
+        LDAPResultNoSuchOperation                         // 119 -- RFC 3909
+        LDAPResultTooLate                                 // 120 -- RFC 3909
+        LDAPResultCannotCancel                            // 121 -- RFC 3909
+        LDAPResultAssertionFailed                         // 122 -- RFC 4528
+        LDAPAuthorizationDenied                           // 123 -- RFC 4370
 )
 
 /*
@@ -128,3 +135,5 @@ const (
 	ErrorFilterCompile                           // 301 ; filter compilation (encoding) error
 	ErrorFilterDecompile                         // 302 ; filter decompilation (decoding) error
 )
+
+const LDAPResultESyncRefreshRequired ResultCode = 4096 // 4096 -- RFC 4533
