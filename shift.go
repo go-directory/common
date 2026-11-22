@@ -53,7 +53,7 @@ Size returns the bit size of the receiver. Possible (valid)
 values are eight (8), sixteen (16) or thirty-two (32).
 
 A value of zero (0) indicates the instance has not yet been
-initialized (hint: see the New function).
+initialized (hint: see the [NewBitValue] function).
 */
 func (r BitValueKind) Size() (size int) {
 	size = 0
@@ -71,13 +71,15 @@ func (r BitValueKind) Size() (size int) {
 }
 
 /*
+Deprecated: shift bits manually.
+
 BitValue contains the allocated value type, a BitValueKind and a bit size reflecting the
 allocated instance magnitude.
 
 Shift, Unshift and Positive operations may be conducted against instances of this
 type.
 
-New instances of this type are created using the New package-level function.
+New instances of this type are created using the [NewBitValue] package-level function.
 */
 type BitValue struct {
 	k BitValueKind   // user-selected BitValueKind
@@ -90,7 +92,7 @@ type BitValue struct {
 Value returns the unasserted (POINTER) instance of an
 interface (any) within the receiver instance. If the
 value is nil, this indicates the receiver instance has
-not yet been initialized (hint: see New function).
+not yet been initialized (hint: see [NewBitValue] function).
 */
 func (r BitValue) Value() any {
 	return r.v
@@ -473,6 +475,8 @@ func (r BitValue) strIndex(x string) (idx int) {
 }
 
 /*
+Deprecated: shift bits manually.
+
 NewBitValue initializes a new instance of [BitValue], using [BitValueKind] k as
 the indicator for the desired bit allocation size. See the [BitValueKind]
 constants for available values.
