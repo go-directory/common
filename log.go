@@ -20,11 +20,11 @@ type Logger interface {
 }
 
 /*
-EventLogger stores the [Logger] instance meant to handle or discard
+eventLogger stores the [Logger] instance meant to handle or discard
 log events. Users may supply their own concrete [Logger] type if
 desired.
 */
-var EventLogger Logger
+var eventLogger Logger
 
 /*
 [LogLevel] defines the desired degree of verbosity.
@@ -55,32 +55,3 @@ const (
 	logTrace                      // 4
 	logInfo                       // 8
 )
-
-/*
-NewEmitter returns an instance of func(string, ...any).
-
-The return value is meant to be used when a particular log
-entry is to be written to the specified logging facility l,
-and likely only when a particular logging level is set.
-
-The return value internals are as follows:
-
-	func(string, ...any) {
-		l.Printf(<timestamp> SPACE <formatted-message>)
-	}
-
-If a different format is desired, callers may simply craft
-their own constructor(s).
-
-By default, the return value will emit messages whenever it
-is called. Callers SHOULD wrap any call of return value within
-a logging level conditional statement if emissions are to be
-controlled based on a desired verbosity.
-*/
-func NewEmitter(l Logger) func(string, ...any) {
-	return func(m string, v ...any) {
-                ts := string(GenTimeNow(true))
-                l.Printf(ts + " " + m, v...)
-	}
-}
-

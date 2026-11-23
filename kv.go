@@ -16,7 +16,7 @@ const (
 	bytesKVType             // 5 ([]byte)
 	bytesSliceKVType        // 6 ([][]byte)
 	presKVType              // 7 (struct{})
-	countKVType		// 8 (*Counter)
+	countKVType             // 8 (*Counter)
 )
 
 /*
@@ -134,7 +134,7 @@ instances.
 
 See also [KVStore.Name].
 */
-func (r *KVStore) SetName(name string) { 
+func (r *KVStore) SetName(name string) {
 	if len(name) > 0 {
 		r.doLock()
 		defer r.doUnlock()
