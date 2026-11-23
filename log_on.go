@@ -89,6 +89,5 @@ func defaultEmitter(m string, v ...any) {
 
 func init() {
 	log.SetFlags(0)
-	LogLevel = 65535
 	SetEventLogger(ConsoleLogger{})
 }
