@@ -22,15 +22,15 @@ var setEvtLogLocker = &sync.Mutex{}
 SetEventLogger activates the provided [Logger] instance.
 
 The variadic emitter input argument, when specified, allows the override
-of the event emission using a user-authored closure instance of the 
+of the event emission using a user-authored closure instance of the
 signature shown.
 */
-func SetEventLogger(l Logger, emitter ...func(string,...any)) {
+func SetEventLogger(l Logger, emitter ...func(string, ...any)) {
 	setEvtLogLocker.Lock()
 	defer setEvtLogLocker.Unlock()
 
 	if l != nil {
-        	eventLogger = l
+		eventLogger = l
 		emit = defaultEmitter
 		if len(emitter) > 0 && emitter[0] != nil {
 			emit = emitter[0]
@@ -84,7 +84,7 @@ var emit func(string, ...any)
 // default emitter
 func defaultEmitter(m string, v ...any) {
 	ts := string(GenTimeNow(true))
-	eventLogger.Printf(ts + " " + m, v...)
+	eventLogger.Printf(ts+" "+m, v...)
 }
 
 func init() {

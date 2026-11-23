@@ -16,7 +16,7 @@ Logging can be enabled via the following process in any given
   - go build (or go run) with -t "godir_debug_<pkg_namespace>", or ...
   - go build (or go run) with -t "godir_debug_all"
 
-Next, a non-zero logging level must be set in order for events to 
+Next, a non-zero logging level must be set in order for events to
 actually appear. Each package bears its own [LogLevel] uint16 global,
 which may be manipulated in an additive or subtractive manner according
 to the following available "verbosity bit values":
