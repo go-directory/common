@@ -14,10 +14,10 @@ var (
 )
 
 var (
-	bLC  = bytes.ToLower
-	bEQ  = bytes.Equal
-	bEQF = bytes.EqualFold
-	bHas = bytes.Contains
+	bLC   = bytes.ToLower
+	bEQ   = bytes.Equal
+	bEQF  = bytes.EqualFold
+	bHas  = bytes.Contains
 	bHSfx = bytes.HasSuffix
 )
 
