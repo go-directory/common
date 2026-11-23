@@ -96,4 +96,3 @@ func (r *Counter) Count() uint64 {
 	defer r.lock.Unlock()
 	return r.counter
 }
-
