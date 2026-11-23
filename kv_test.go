@@ -3,8 +3,11 @@ package common
 import "fmt"
 
 func ExampleKVStore() {
-	// Initialize a new KVStore instance (REQUIRED!)
+	// REQUIRED: Initialize a new KVStore instance.
 	kvs := NewKVStore()
+
+	// OPTIONAL: set a name for this instance.
+	kvs.SetName("example")
 
 	// OPTIONAL: Protect with mutex locking. Use of
 	// false entirely disables locking.
@@ -18,7 +21,7 @@ func ExampleKVStore() {
 	// with the default behavior.
 	kvs.SetCaseExact(false)
 
-	// Add some values. Each of the seven (7) allowed
+	// Add some values. Each of the eight (8) allowed
 	// types are demonstrated below.
 
 	// bool
@@ -50,12 +53,16 @@ func ExampleKVStore() {
 	// just an index (e.g.: "unique").
 	kvs.SetEmpty("unique")
 
-	// Determine the kind of type for an index.
-	kind := kvs.Kind("readonly")
+	// Set an atomic counter. This is particularly
+	// useful if many counters exist within various
+	// runtime objects and where centralized access
+	// to those instances is desired.
+	kvs.Set("Atomic Counter", &Counter{})
 
 	var (
 		expected uint64
 		whatever any
+		acounter *Counter
 		err      error
 	)
 
@@ -71,17 +78,31 @@ func ExampleKVStore() {
 		return
 	}
 
+	// Call our atomic counter value
+	if acounter, err = kvs.Get[*Counter]("atomic counter"); err != nil {
+		fmt.Printf("Unable to retrieve counter: %v", err)
+		return
+	}
+
+	// Make arbitrary update of atomic counter.
+	acounter.Increment(4444)
+
+	// Check if pointer instance reflects the above update.
+	acounter, _ = kvs.Get[*Counter]("atomic counter")
+	if ct := acounter.Count(); ct != 4444 {
+		fmt.Printf("Unexpected count, want 4444, got %d", ct)
+	}
+
 	// See how many entries reside within the receiver instance.
 	indices := kvs.Len()
 
 	// Print out some facts
 	fmt.Printf("Is thread safe:  %t\n", kvs.IsThreadSafe())
-	fmt.Printf("ReadOnly kind:   %d\n", kind)
+	fmt.Printf("ReadOnly kind:   %d\n", kvs.Kind("readonly"))
 	fmt.Printf("Expected value:  %T (%d)\n", expected, expected)
 	fmt.Printf("Whatever value:  %T (%#v)\n", whatever, whatever)
 	fmt.Printf("Num. indices:    %d\n", indices)
 	fmt.Printf("'unique' exists: %t\n", kvs.Exists("unique"))
-
 	fmt.Println("Freeing KVStore from memory")
 	kvs.Free()
 	fmt.Printf("KVStore freed:   %t\n", kvs.IsNil())
@@ -91,7 +112,7 @@ func ExampleKVStore() {
 	// ReadOnly kind:   4
 	// Expected value:  uint64 (137744)
 	// Whatever value:  int64 (-4775)
-	// Num. indices:    7
+	// Num. indices:    8
 	// 'unique' exists: true
 	// Freeing KVStore from memory
 	// KVStore freed:   true

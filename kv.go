@@ -16,6 +16,7 @@ const (
 	bytesKVType             // 5 ([]byte)
 	bytesSliceKVType        // 6 ([][]byte)
 	presKVType              // 7 (struct{})
+	countKVType		// 8 (*Counter)
 )
 
 /*
@@ -29,9 +30,10 @@ concrete types:
   - []byte
   - [][]byte
   - struct{}  (ex.: "seen tables")
+  - *Counter
 */
 type KVStorable interface {
-	~int64 | ~uint64 | ~float64 | ~bool | ~[]byte | ~[][]byte | ~struct{}
+	~int64 | ~uint64 | ~float64 | ~bool | ~[]byte | ~[][]byte | ~struct{} | ~*Counter
 }
 
 /*
@@ -74,6 +76,7 @@ To free the receiver from memory -- thereby annihilating it -- see the
 [KVStore.Free] method.
 */
 type KVStore struct {
+	name     string
 	lock     *sync.Mutex
 	doLock   func()
 	doUnlock func()
@@ -89,6 +92,7 @@ By default, the return instance has thread-safety disabled, and matching
 requests will ignore case-folding of map indices.
 */
 func NewKVStore() *KVStore {
+	emitT("init KVStore")
 	return &KVStore{
 		doLock:   func() {},
 		doUnlock: func() {},
@@ -116,6 +120,30 @@ completely nil, or at least zero.
 func (r *KVStore) IsNil() bool { return r == nil || r.isZero() }
 
 /*
+Name returns the string name assigned to the receiver instance.
+
+See also [KVStore.SetName].
+*/
+func (r *KVStore) Name() string { return r.name }
+
+/*
+SetName assigns the input name to the receiver instance.
+
+Note that no uniqueness checking is performed among multiple [KVStore]
+instances.
+
+See also [KVStore.Name].
+*/
+func (r *KVStore) SetName(name string) { 
+	if len(name) > 0 {
+		r.doLock()
+		defer r.doUnlock()
+		r.name = name
+		emitT("KVStore{%s}.SetName", r.name)
+	}
+}
+
+/*
 Len returns the integer length of the underlying key/value store. The
 return indicates the number of indices presently stored.
 */
@@ -141,13 +169,21 @@ A working lock will not be needlessly replaced with another working lock.
 func (r *KVStore) SetThreadSafe(enable bool) {
 	if enable && r.lock == nil {
 		r.lock = &sync.Mutex{}
-		r.doLock = func() { r.lock.Lock() }
-		r.doUnlock = func() { r.lock.Unlock() }
+		r.doLock = func() {
+			emitT("KVStore{%s} lock", r.name)
+			r.lock.Lock()
+		}
+		r.doUnlock = func() {
+			emitT("KVStore{%s} unlock", r.name)
+			r.lock.Unlock()
+		}
 	} else if !enable && r.lock != nil {
 		r.lock = nil
 		r.doLock = func() {}
 		r.doUnlock = func() {}
 	}
+
+	emitT("KVStore{%s}.SetThreadSafe %t", r.name, enable)
 }
 
 /*
@@ -176,6 +212,7 @@ place.
 func (r *KVStore) SetCaseExact(enable bool) {
 	r.doLock()
 	defer r.doUnlock()
+	emitT("KVStore{%s}.SetCaseExact %t", r.name, enable)
 
 	if enable {
 		r.fold = func(s string) string { return s }
@@ -196,6 +233,7 @@ func (r *KVStore) Set[T KVStorable](index string, val T) {
 	r.doLock()
 	defer r.doUnlock()
 
+	emitT("KVStore{%s}.Set %q -> %T", r.name, index, val)
 	if !r.Exists(index) {
 		r.store[r.fold(index)] = val
 	}
@@ -214,6 +252,7 @@ func (r *KVStore) SetEmpty(index string) {
 	r.doLock()
 	defer r.doUnlock()
 
+	emitT("KVStore{%s}.SetEmpty %q", r.name, index)
 	if !r.Exists(index) {
 		r.store[r.fold(index)] = struct{}{}
 	}
@@ -228,6 +267,7 @@ func (r *KVStore) Update[T KVStorable](index string, val T) {
 	r.doLock()
 	defer r.doUnlock()
 
+	emitT("KVStore{%s}.Update %q -> %T", r.name, index, val)
 	r.store[r.fold(index)] = val
 }
 
@@ -278,6 +318,7 @@ func (r *KVStore) Delete(index string) {
 	r.doLock()
 	defer r.doUnlock()
 
+	emitT("KVStore{%s}.Delete %q", r.name, index)
 	delete(r.store, r.fold(index))
 }
 
@@ -310,6 +351,9 @@ func (r *KVStore) Get[T KVStorable](index string) (T, error) {
 		val = zero
 		err = mkerr("KVStore.Get: index not found: " + index)
 	}
+	emitT("KVStore{%s}.Get call %q, found:%t, val:%T",
+		r.name, index, ok, val)
+
 	return val, err
 }
 
@@ -331,6 +375,8 @@ func (r *KVStore) GetAny(index string) (any, error) {
 	if val, ok = r.store[r.fold(index)]; !ok {
 		err = mkerr("KVStore.GetAny: index not found: " + index)
 	}
+	emitT("KVStore{%s}.GetAny call %q, found:%t, val:%T",
+		r.name, index, ok, val)
 
 	return val, err
 }
