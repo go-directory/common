@@ -13,9 +13,24 @@ Counter implements a single, thread-safe general-use counter with
 repeater capabilities.
 */
 type Counter struct {
+	name    []byte
 	lock    sync.Mutex
 	counter uint64
 	also    *Counter
+}
+
+/*
+Subordinate creates and returns a new instance of *[Counter] that
+has automatically been linked to the receiver. If the return value
+is modified, the change is chained to the receiver instance.
+*/
+func (r *Counter) Subordinate(name ...[]byte) *Counter {
+	var n []byte
+	if len(name) > 0 && len(name[0]) > 0 {
+		n = name[0]
+	}
+	emitT("%T.Subordinate -> %q", *r, n)
+	return &Counter{name: n, also: r}
 }
 
 /*
@@ -51,9 +66,13 @@ func (r *Counter) Increment(n ...uint64) {
 	if len(n) > 0 {
 		i = n[0]
 	}
-	r.counter += i
 
-	if r.also != nil {
+	repeat := r.also != nil
+	r.counter += i
+	emitT("%T.Increment %q += %d [now:%d, repeat:%t]",
+		*r, r.name, i, r.counter, repeat)
+
+	if repeat {
 		r.also.Increment(n...)
 	}
 }
@@ -77,13 +96,18 @@ func (r *Counter) Decrement(n ...uint64) {
 	if len(n) > 0 {
 		i = n[0]
 	}
+	repeat := r.also != nil
 	if i > r.counter {
 		r.counter = 0
+		emitT("%T.Decrement reset %q [now:%d, repeat:%t]",
+			*r, r.name, r.counter, repeat)
 	} else {
 		r.counter -= i
+		emitT("%T.Decrement %q -= %d [now:%d, repeat:%t]",
+			*r, r.name, i, r.counter, repeat)
 	}
 
-	if r.also != nil {
+	if repeat {
 		r.also.Decrement(n...)
 	}
 }
@@ -95,4 +119,10 @@ func (r *Counter) Count() uint64 {
 	r.lock.Lock()
 	defer r.lock.Unlock()
 	return r.counter
+}
+
+func (r *Counter) SetName(name []byte) {
+	if len(name) > 0 && len(r.name) == 0 {
+		r.name = name
+	}
 }
